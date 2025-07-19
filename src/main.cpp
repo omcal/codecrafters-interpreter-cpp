@@ -3,9 +3,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <vector>
+#include "token.h"
 
 std::string read_file_contents(const std::string& filename);
-
+void add_token(TokenType type,std::string lexeme);
+std::vector<Token> tokens;
 int main(int argc, char *argv[]) {
     // // Disable output buffering
     // std::cout << std::unitbuf;
@@ -21,43 +24,61 @@ int main(int argc, char *argv[]) {
 
     const std::string command = argv[1];
 
-    if (command == "tokenize") {
-        std::string file_contents = read_file_contents(argv[2]);
-        
-        if (!file_contents.empty()) {
-            for (auto it = file_contents.begin(); it != file_contents.end(); ++it) {
-                switch(*it)
-                {
-                    case '(':{
-                        std::cout << "LEFT_PAREN" << " (" << " null" << "\n";
-                        break;
-                    }
-                    case ')':{
-                        std::cout << "RIGHT_PAREN" << " )" << " null" << "\n";
-                        break;
-                    }
-                    case '{':{
-                        std::cout << "LEFT_BRACE" << " {" << " null" << "\n";
-                        break;
-                    }
-                    case '}':{
-                        std::cout << "RIGHT_BRACE" << " }" << " null" << "\n";
-                        break;
-                    }
+if (command == "tokenize") {
+    std::string file_contents = read_file_contents(argv[2]);
+    int index = 0;
+    if (!file_contents.empty()) {
+        for (auto it = file_contents.begin(); it != file_contents.end(); ++it, index++) {
+            switch (*it) {
+                case ',':
+                    add_token(TokenType::COMMA, ",");
+                    break;
+                case '.':
+                    add_token(TokenType::DOT, ".");
+                    break;
+                case '-':
+                    add_token(TokenType::MINUS, "-");
+                    break;
+                case '+':
+                    add_token(TokenType::PLUS, "+");
+                    break;
+                case ';':
+                    add_token(TokenType::SEMICOLON, ";");
+                    break;
+                case '/':
+                    add_token(TokenType::SLASH, "/");
+                    break;
+                case '*':
+                    add_token(TokenType::STAR, "*");
+                    break;
+                case '(':
+                    add_token(TokenType::LEFT_PAREN, "(");
+                    break;
+                case ')':
+                    add_token(TokenType::RIGHT_PAREN, ")");
+                    break;
+                case '{':
+                    add_token(TokenType::LEFT_BRACE, "{");
+                    break;
+                case '}':
+                    add_token(TokenType::RIGHT_BRACE, "}");
+                    break;
+                default:
+                    break;
+            }
 
-                    default:
-                    break;                    
-                };
+            if (!tokens.empty()) {
+                std::cout << tokens[index] << std::endl;
             }
         }
-        std::cout << "EOF  null" << std::endl; // Placeholder, replace this line when implementing the scanner
-        
-    } else {
-        std::cerr << "Unknown command: " << command << std::endl;
-        return 1;
     }
 
-    return 0;
+    std::cout << "EOF  null" << std::endl;
+    return 0; 
+}
+std::cerr << "Unknown command: " << command << std::endl;
+return 1;
+
 }
 
 std::string read_file_contents(const std::string& filename) {
@@ -72,4 +93,9 @@ std::string read_file_contents(const std::string& filename) {
     file.close();
 
     return buffer.str();
+}
+
+void add_token(TokenType type,std::string lexeme) {
+    Token token = Token(type, lexeme, std::nullopt, 0); 
+    tokens.push_back(token);
 }
