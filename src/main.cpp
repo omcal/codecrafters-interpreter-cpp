@@ -36,6 +36,15 @@ int main(int argc, char *argv[]) {
                         std::cout << "RIGHT_PAREN" << " )" << " null" << "\n";
                         break;
                     }
+                    case '{':{
+                        std::cout << "LEFT_BRACE" << " {" << " null" << "\n";
+                        break;
+                    }
+                    case '}':{
+                        std::cout << "RIGHT_BRACE" << " }" << " null" << "\n";
+                        break;
+                    }
+
                     default:
                     break;                    
                 };
