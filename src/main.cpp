@@ -15,6 +15,8 @@ int main(int argc, char *argv[]) {
     // std::cerr << std::unitbuf;
 
     // You can use print statements as follows for debugging, they'll be visible when running tests.
+
+    int ret_val = 0;
     std::cerr << "Logs from your program will appear here!" << std::endl;
 
     if (argc < 3) {
@@ -26,9 +28,8 @@ int main(int argc, char *argv[]) {
 
 if (command == "tokenize") {
     std::string file_contents = read_file_contents(argv[2]);
-    int index = 0;
     if (!file_contents.empty()) {
-        for (auto it = file_contents.begin(); it != file_contents.end(); ++it, index++) {
+        for (auto it = file_contents.begin(); it != file_contents.end(); ++it) {
             switch (*it) {
                 case ',':
                     add_token(TokenType::COMMA, ",");
@@ -63,18 +64,17 @@ if (command == "tokenize") {
                 case '}':
                     add_token(TokenType::RIGHT_BRACE, "}");
                     break;
-                default:
-                    break;
-            }
-
-            if (!tokens.empty()) {
-                std::cout << tokens[index] << std::endl;
+                default:{
+                std::cerr << "[line 1] Error: Unexpected character: " << *it << std::endl;
+                ret_val=65;
+                break;
+                }
             }
         }
     }
 
     std::cout << "EOF  null" << std::endl;
-    return 0; 
+    return ret_val; 
 }
 std::cerr << "Unknown command: " << command << std::endl;
 return 1;
@@ -98,4 +98,5 @@ std::string read_file_contents(const std::string& filename) {
 void add_token(TokenType type,std::string lexeme) {
     Token token = Token(type, lexeme, std::nullopt, 0); 
     tokens.push_back(token);
+    std::cout << token << std::endl;
 }
