@@ -80,6 +80,17 @@ if (command == "tokenize") {
                 }
                     break;
                 }
+                case '!':{
+                    if ((it + 1) != file_contents.end() && *(it+1) == '=') {
+                        ++it; 
+                        add_token(TokenType::BANG_EQUAL, "!=");
+                } 
+                else 
+                {
+                        add_token(TokenType::BANG, "!");
+                }
+                    break;
+                }
                 default:{
                 std::cerr << "[line 1] Error: Unexpected character: " << *it << std::endl;
                 ret_val=65;

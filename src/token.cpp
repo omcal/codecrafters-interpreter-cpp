@@ -65,6 +65,10 @@ std::string TokentypeToString(TokenType type)
         return "EQUAL";
     case EQUAL_EQUAL:
         return "EQUAL_EQUAL";
+    case BANG:
+        return "BANG";
+    case BANG_EQUAL:
+        return "BANG_EQUAL";    
     default:
         return "UNKNOWN_TOKEN";
     }

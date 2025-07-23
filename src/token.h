@@ -18,6 +18,8 @@ enum TokenType
     STAR,
     EQUAL_EQUAL,
     EQUAL,
+    BANG,
+    BANG_EQUAL,
     EOF_TOKEN
 };
 
