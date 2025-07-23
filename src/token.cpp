@@ -61,6 +61,10 @@ std::string TokentypeToString(TokenType type)
         return "STAR";
     case EOF_TOKEN:
         return "EOF";
+    case EQUAL:
+        return "EQUAL";
+    case EQUAL_EQUAL:
+        return "EQUAL_EQUAL";
     default:
         return "UNKNOWN_TOKEN";
     }

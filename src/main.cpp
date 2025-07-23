@@ -56,14 +56,30 @@ if (command == "tokenize") {
                     add_token(TokenType::LEFT_PAREN, "(");
                     break;
                 case ')':
+                {
                     add_token(TokenType::RIGHT_PAREN, ")");
                     break;
+                }
                 case '{':
+                {
                     add_token(TokenType::LEFT_BRACE, "{");
                     break;
-                case '}':
+                }
+                case '}':{
                     add_token(TokenType::RIGHT_BRACE, "}");
                     break;
+                }
+                case '=':{
+                    if ((it + 1) != file_contents.end() && *(it+1) == '=') {
+                        ++it; 
+                        add_token(TokenType::EQUAL_EQUAL, "==");
+                } 
+                else 
+                {
+                        add_token(TokenType::EQUAL, "=");
+                }
+                    break;
+                }
                 default:{
                 std::cerr << "[line 1] Error: Unexpected character: " << *it << std::endl;
                 ret_val=65;
