@@ -83,6 +83,38 @@ std::string TokentypeToString(TokenType type)
         return "NUMBER";
     case IDENTIFIER:
         return "IDENTIFIER";
+    case AND:
+        return "AND";
+    case CLASS:
+        return "CLASS";
+    case ELSE:
+        return "ELSE";
+    case FALSE:
+        return "FALSE";
+    case FOR:
+        return "FOR";
+    case FUN:
+        return "FUN";
+    case IF:
+        return "IF";
+    case NIL:
+        return "NIL";
+    case OR:
+        return "OR";
+    case PRINT:
+        return "PRINT";
+    case RETURN:
+        return "RETURN";
+    case SUPER:
+        return "SUPER";
+    case THIS:
+        return "THIS";
+    case TRUE:
+        return "TRUE";
+    case VAR:
+        return "VAR";
+    case WHILE:
+        return "WHILE";
     default:
         return "UNKNOWN_TOKEN";
     }

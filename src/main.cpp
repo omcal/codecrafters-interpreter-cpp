@@ -11,6 +11,7 @@ void add_token(TokenType type, std::string lexeme, std::optional<std::string> li
 bool is_digit(char c);
 bool is_alpha(char c);
 bool is_alnum(char c);
+TokenType get_keyword_type(const std::string& text);
 std::string normalize_number(const std::string& number);
 std::vector<Token> tokens;
 int line_number = 1;
@@ -151,17 +152,14 @@ int main(int argc, char *argv[]) {
                 
                 default:
                     if (is_digit(c)) {
-                        // Handle number literals
                         std::string number = "";
                         size_t start = i;
                         
-                        // Consume all consecutive digits
                         while (i < file_contents.length() && is_digit(file_contents[i])) {
                             number += file_contents[i];
                             i++;
                         }
                         
-                        // Check for decimal point
                         if (i < file_contents.length() && file_contents[i] == '.' && 
                             i + 1 < file_contents.length() && is_digit(file_contents[i + 1])) {
                             number += ".";
@@ -181,11 +179,9 @@ int main(int argc, char *argv[]) {
                         tokens.push_back(token);
                         std::cout << token << std::endl;
                     } else if (is_alpha(c)) {
-                        // Handle identifiers
                         std::string identifier = "";
                         size_t start = i;
                         
-                        // Consume all consecutive alphanumeric characters
                         while (i < file_contents.length() && is_alnum(file_contents[i])) {
                             identifier += file_contents[i];
                             i++;
@@ -193,9 +189,16 @@ int main(int argc, char *argv[]) {
                         
                         i--;
                         
-                        Token token = Token(TokenType::IDENTIFIER, identifier, std::nullopt, line_number);
-                        tokens.push_back(token);
-                        std::cout << token << std::endl;
+                        TokenType tokenType = get_keyword_type(identifier);
+                        if (tokenType == TokenType::IDENTIFIER) {
+                            Token token = Token(TokenType::IDENTIFIER, identifier, std::nullopt, line_number);
+                            tokens.push_back(token);
+                            std::cout << token << std::endl;
+                        } else {
+                            Token token = Token(tokenType, identifier, std::nullopt, line_number);
+                            tokens.push_back(token);
+                            std::cout << token << std::endl;
+                        }
                     } else {
                         std::cerr << "[line " << line_number << "] Error: Unexpected character: " << c << std::endl;
                         ret_val = 65;
@@ -244,16 +247,35 @@ bool is_alnum(char c) {
     return is_alpha(c) || is_digit(c);
 }
 
+TokenType get_keyword_type(const std::string& text) {
+    if (text == "and") return TokenType::AND;
+    if (text == "class") return TokenType::CLASS;
+    if (text == "else") return TokenType::ELSE;
+    if (text == "false") return TokenType::FALSE;
+    if (text == "for") return TokenType::FOR;
+    if (text == "fun") return TokenType::FUN;
+    if (text == "if") return TokenType::IF;
+    if (text == "nil") return TokenType::NIL;
+    if (text == "or") return TokenType::OR;
+    if (text == "print") return TokenType::PRINT;
+    if (text == "return") return TokenType::RETURN;
+    if (text == "super") return TokenType::SUPER;
+    if (text == "this") return TokenType::THIS;
+    if (text == "true") return TokenType::TRUE;
+    if (text == "var") return TokenType::VAR;
+    if (text == "while") return TokenType::WHILE;
+    
+    // If it's not a keyword, return IDENTIFIER
+    return TokenType::IDENTIFIER;
+}
+
 std::string normalize_number(const std::string& number) {
-    // If it's an integer (no decimal point), add ".0"
     if (number.find('.') == std::string::npos) {
         return number + ".0";
     }
     
-    // If it has a decimal point, remove trailing zeros but keep at least one digit after decimal
     std::string result = number;
     
-    // Remove trailing zeros after decimal point
     while (result.length() > 2 && result.back() == '0' && result[result.length() - 2] != '.') {
         result.pop_back();
     }
