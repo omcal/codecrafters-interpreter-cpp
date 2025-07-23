@@ -25,6 +25,7 @@ enum TokenType
     GREATER,
     GREATER_EQUAL,
     STRING,
+    NUMBER,
     EOF_TOKEN
 };
 

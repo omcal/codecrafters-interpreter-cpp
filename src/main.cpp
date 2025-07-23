@@ -8,6 +8,8 @@
 
 std::string read_file_contents(const std::string& filename);
 void add_token(TokenType type, std::string lexeme, std::optional<std::string> literal = std::nullopt);
+bool is_digit(char c);
+std::string normalize_number(const std::string& number);
 std::vector<Token> tokens;
 int line_number = 1;
 
@@ -33,7 +35,6 @@ int main(int argc, char *argv[]) {
                 case ' ':
                 case '\r':
                 case '\t':
-                    // Ignore whitespace
                     break;
                     
                 case '\n':
@@ -74,7 +75,7 @@ int main(int argc, char *argv[]) {
                 case '!':
                     if (i + 1 < file_contents.length() && file_contents[i + 1] == '=') {
                         add_token(TokenType::BANG_EQUAL, "!=");
-                        i++; // Skip the '='
+                        i++; 
                     } else {
                         add_token(TokenType::BANG, "!");
                     }
@@ -83,7 +84,7 @@ int main(int argc, char *argv[]) {
                 case '=':
                     if (i + 1 < file_contents.length() && file_contents[i + 1] == '=') {
                         add_token(TokenType::EQUAL_EQUAL, "==");
-                        i++; // Skip the '='
+                        i++; 
                     } else {
                         add_token(TokenType::EQUAL, "=");
                     }
@@ -92,7 +93,7 @@ int main(int argc, char *argv[]) {
                 case '<':
                     if (i + 1 < file_contents.length() && file_contents[i + 1] == '=') {
                         add_token(TokenType::LESS_EQUAL, "<=");
-                        i++; // Skip the '='
+                        i++; 
                     } else {
                         add_token(TokenType::LESS, "<");
                     }
@@ -101,7 +102,7 @@ int main(int argc, char *argv[]) {
                 case '>':
                     if (i + 1 < file_contents.length() && file_contents[i + 1] == '=') {
                         add_token(TokenType::GREATER_EQUAL, ">=");
-                        i++; // Skip the '='
+                        i++; 
                     } else {
                         add_token(TokenType::GREATER, ">");
                     }
@@ -109,8 +110,7 @@ int main(int argc, char *argv[]) {
                     
                 case '/':
                     if (i + 1 < file_contents.length() && file_contents[i + 1] == '/') {
-                        // Skip comment until end of line
-                        i++; // Skip second '/'
+                        i++; 
                         while (i + 1 < file_contents.length() && file_contents[i + 1] != '\n') {
                             i++;
                         }
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
                 case '"': {
                     std::string value = "";
                     std::string lexeme = "\"";
-                    i++; // Skip opening quote
+                    i++; 
                     
                     while (i < file_contents.length() && file_contents[i] != '"') {
                         if (file_contents[i] == '\n') {
@@ -134,16 +134,13 @@ int main(int argc, char *argv[]) {
                     }
                     
                     if (i >= file_contents.length()) {
-                        // Unterminated string
                         std::cerr << "[line " << line_number << "] Error: Unterminated string." << std::endl;
                         ret_val = 65;
                         break;
                     }
                     
-                    // Add closing quote to lexeme
                     lexeme += "\"";
                     
-                    // Create token with literal value
                     Token token = Token(TokenType::STRING, lexeme, value, line_number);
                     tokens.push_back(token);
                     std::cout << token << std::endl;
@@ -151,8 +148,40 @@ int main(int argc, char *argv[]) {
                 }
                 
                 default:
-                    std::cerr << "[line " << line_number << "] Error: Unexpected character: " << c << std::endl;
-                    ret_val = 65;
+                    if (is_digit(c)) {
+                        // Handle number literals
+                        std::string number = "";
+                        size_t start = i;
+                        
+                        // Consume all consecutive digits
+                        while (i < file_contents.length() && is_digit(file_contents[i])) {
+                            number += file_contents[i];
+                            i++;
+                        }
+                        
+                        // Check for decimal point
+                        if (i < file_contents.length() && file_contents[i] == '.' && 
+                            i + 1 < file_contents.length() && is_digit(file_contents[i + 1])) {
+                            number += ".";
+                            i++; 
+                            
+                            while (i < file_contents.length() && is_digit(file_contents[i])) {
+                                number += file_contents[i];
+                                i++;
+                            }
+                        }
+                        
+                        i--;
+                        
+                        std::string literal = normalize_number(number);
+                        
+                        Token token = Token(TokenType::NUMBER, number, literal, line_number);
+                        tokens.push_back(token);
+                        std::cout << token << std::endl;
+                    } else {
+                        std::cerr << "[line " << line_number << "] Error: Unexpected character: " << c << std::endl;
+                        ret_val = 65;
+                    }
                     break;
             }
         }
@@ -183,4 +212,25 @@ void add_token(TokenType type, std::string lexeme, std::optional<std::string> li
     Token token = Token(type, lexeme, literal, line_number);
     tokens.push_back(token);
     std::cout << token << std::endl;
+}
+
+bool is_digit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+std::string normalize_number(const std::string& number) {
+    // If it's an integer (no decimal point), add ".0"
+    if (number.find('.') == std::string::npos) {
+        return number + ".0";
+    }
+    
+    // If it has a decimal point, remove trailing zeros but keep at least one digit after decimal
+    std::string result = number;
+    
+    // Remove trailing zeros after decimal point
+    while (result.length() > 2 && result.back() == '0' && result[result.length() - 2] != '.') {
+        result.pop_back();
+    }
+    
+    return result;
 }
