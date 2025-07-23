@@ -76,8 +76,7 @@ std::string TokentypeToString(TokenType type)
     case GREATER:
         return "GREATER";
     case GREATER_EQUAL:
-        return "GREATER_EQUAL";    
-
+        return "GREATER_EQUAL";
     default:
         return "UNKNOWN_TOKEN";
     }

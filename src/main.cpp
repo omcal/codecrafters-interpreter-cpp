@@ -46,9 +46,16 @@ if (command == "tokenize") {
                 case ';':
                     add_token(TokenType::SEMICOLON, ";");
                     break;
-                case '/':
-                    add_token(TokenType::SLASH, "/");
+                case '/':{
+                    if ((it + 1) != file_contents.end() && *(it+1) == '/') {
+                        ++it; 
+                        while((it+1)!=file_contents.end()) ++it;
+                    }else{
+                        add_token(TokenType::SLASH, "/");
+                        break;
+                    }
                     break;
+                }
                 case '*':
                     add_token(TokenType::STAR, "*");
                     break;
