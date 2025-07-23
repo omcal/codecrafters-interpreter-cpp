@@ -68,7 +68,16 @@ std::string TokentypeToString(TokenType type)
     case BANG:
         return "BANG";
     case BANG_EQUAL:
-        return "BANG_EQUAL";    
+        return "BANG_EQUAL";
+    case LESS:
+        return "LESS";
+    case LESS_EQUAL:
+        return "LESS_EQUAL";
+    case GREATER:
+        return "GREATER";
+    case GREATER_EQUAL:
+        return "GREATER_EQUAL";    
+
     default:
         return "UNKNOWN_TOKEN";
     }

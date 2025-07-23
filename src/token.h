@@ -20,6 +20,10 @@ enum TokenType
     EQUAL,
     BANG,
     BANG_EQUAL,
+    LESS,
+    LESS_EQUAL,
+    GREATER,
+    GREATER_EQUAL,
     EOF_TOKEN
 };
 

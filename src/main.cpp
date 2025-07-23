@@ -73,9 +73,7 @@ if (command == "tokenize") {
                     if ((it + 1) != file_contents.end() && *(it+1) == '=') {
                         ++it; 
                         add_token(TokenType::EQUAL_EQUAL, "==");
-                } 
-                else 
-                {
+                } else {
                         add_token(TokenType::EQUAL, "=");
                 }
                     break;
@@ -84,13 +82,30 @@ if (command == "tokenize") {
                     if ((it + 1) != file_contents.end() && *(it+1) == '=') {
                         ++it; 
                         add_token(TokenType::BANG_EQUAL, "!=");
-                } 
-                else 
-                {
+                } else {
                         add_token(TokenType::BANG, "!");
                 }
                     break;
                 }
+                case '<':{
+                    if ((it + 1) != file_contents.end() && *(it+1) == '=') {
+                        ++it; 
+                        add_token(TokenType::LESS_EQUAL, "<=");
+                } else {
+                        add_token(TokenType::LESS, "<");
+                }
+                    break;
+                }
+                case '>':{
+                    if ((it + 1) != file_contents.end() && *(it+1) == '=') {
+                        ++it; 
+                        add_token(TokenType::GREATER_EQUAL, ">=");
+                } else {
+                        add_token(TokenType::GREATER, ">");
+                }
+                    break;
+                }
+
                 default:{
                 std::cerr << "[line 1] Error: Unexpected character: " << *it << std::endl;
                 ret_val=65;
