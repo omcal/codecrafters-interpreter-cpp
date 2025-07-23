@@ -7,16 +7,12 @@
 #include "token.h"
 
 std::string read_file_contents(const std::string& filename);
-void add_token(TokenType type,std::string lexeme);
+void add_token(TokenType type, std::string lexeme, std::optional<std::string> literal = std::nullopt);
 std::vector<Token> tokens;
+int line_number = 1;
+
 int main(int argc, char *argv[]) {
-    // // Disable output buffering
-    // std::cout << std::unitbuf;
-    // std::cerr << std::unitbuf;
-
     // You can use print statements as follows for debugging, they'll be visible when running tests.
-
-    int ret_val = 0;
     std::cerr << "Logs from your program will appear here!" << std::endl;
 
     if (argc < 3) {
@@ -26,12 +22,36 @@ int main(int argc, char *argv[]) {
 
     const std::string command = argv[1];
 
-if (command == "tokenize") {
-    std::string file_contents = read_file_contents(argv[2]);
-    if (!file_contents.empty()) {
-        int line_number = 1;
-        for (auto it = file_contents.begin(); it != file_contents.end(); ++it) {
-            switch (*it) {
+    if (command == "tokenize") {
+        std::string file_contents = read_file_contents(argv[2]);
+        int ret_val = 0;
+        
+        for (size_t i = 0; i < file_contents.length(); i++) {
+            char c = file_contents[i];
+            
+            switch (c) {
+                case ' ':
+                case '\r':
+                case '\t':
+                    // Ignore whitespace
+                    break;
+                    
+                case '\n':
+                    line_number++;
+                    break;
+                    
+                case '(':
+                    add_token(TokenType::LEFT_PAREN, "(");
+                    break;
+                case ')':
+                    add_token(TokenType::RIGHT_PAREN, ")");
+                    break;
+                case '{':
+                    add_token(TokenType::LEFT_BRACE, "{");
+                    break;
+                case '}':
+                    add_token(TokenType::RIGHT_BRACE, "}");
+                    break;
                 case ',':
                     add_token(TokenType::COMMA, ",");
                     break;
@@ -47,98 +67,102 @@ if (command == "tokenize") {
                 case ';':
                     add_token(TokenType::SEMICOLON, ";");
                     break;
-                case '/':{
-                    if ((it + 1) != file_contents.end() && *(it+1) == '/') {
-                        ++it; 
-                        while((it+1)!=file_contents.end() && *(it+1) != '\n') ++it;
-                    }else{
-                        add_token(TokenType::SLASH, "/");
-                        break;
-                    }
-                    break;
-                }
                 case '*':
                     add_token(TokenType::STAR, "*");
                     break;
-                case '(':
-                    add_token(TokenType::LEFT_PAREN, "(");
-                    break;
-                case ')':
-                {
-                    add_token(TokenType::RIGHT_PAREN, ")");
-                    break;
-                }
-                case '\n':{
-                    line_number++;
-                    break;
-                }
-                case '\t':{
-                    break;
-                }
-                case ' ':{
-                    break;
-                }
-                case '{':
-                {
-                    add_token(TokenType::LEFT_BRACE, "{");
-                    break;
-                }
-                case '}':{
-                    add_token(TokenType::RIGHT_BRACE, "}");
-                    break;
-                }
-                case '=':{
-                    if ((it + 1) != file_contents.end() && *(it+1) == '=') {
-                        ++it; 
-                        add_token(TokenType::EQUAL_EQUAL, "==");
-                } else {
-                        add_token(TokenType::EQUAL, "=");
-                }
-                    break;
-                }
-                case '!':{
-                    if ((it + 1) != file_contents.end() && *(it+1) == '=') {
-                        ++it; 
+                    
+                case '!':
+                    if (i + 1 < file_contents.length() && file_contents[i + 1] == '=') {
                         add_token(TokenType::BANG_EQUAL, "!=");
-                } else {
+                        i++; // Skip the '='
+                    } else {
                         add_token(TokenType::BANG, "!");
-                }
+                    }
                     break;
-                }
-                case '<':{
-                    if ((it + 1) != file_contents.end() && *(it+1) == '=') {
-                        ++it; 
+                    
+                case '=':
+                    if (i + 1 < file_contents.length() && file_contents[i + 1] == '=') {
+                        add_token(TokenType::EQUAL_EQUAL, "==");
+                        i++; // Skip the '='
+                    } else {
+                        add_token(TokenType::EQUAL, "=");
+                    }
+                    break;
+                    
+                case '<':
+                    if (i + 1 < file_contents.length() && file_contents[i + 1] == '=') {
                         add_token(TokenType::LESS_EQUAL, "<=");
-                } else {
+                        i++; // Skip the '='
+                    } else {
                         add_token(TokenType::LESS, "<");
-                }
+                    }
                     break;
-                }
-                case '>':{
-                    if ((it + 1) != file_contents.end() && *(it+1) == '=') {
-                        ++it; 
+                    
+                case '>':
+                    if (i + 1 < file_contents.length() && file_contents[i + 1] == '=') {
                         add_token(TokenType::GREATER_EQUAL, ">=");
-                } else {
+                        i++; // Skip the '='
+                    } else {
                         add_token(TokenType::GREATER, ">");
-                }
+                    }
+                    break;
+                    
+                case '/':
+                    if (i + 1 < file_contents.length() && file_contents[i + 1] == '/') {
+                        // Skip comment until end of line
+                        i++; // Skip second '/'
+                        while (i + 1 < file_contents.length() && file_contents[i + 1] != '\n') {
+                            i++;
+                        }
+                    } else {
+                        add_token(TokenType::SLASH, "/");
+                    }
+                    break;
+                    
+                case '"': {
+                    std::string value = "";
+                    std::string lexeme = "\"";
+                    i++; // Skip opening quote
+                    
+                    while (i < file_contents.length() && file_contents[i] != '"') {
+                        if (file_contents[i] == '\n') {
+                            line_number++;
+                        }
+                        value += file_contents[i];
+                        lexeme += file_contents[i];
+                        i++;
+                    }
+                    
+                    if (i >= file_contents.length()) {
+                        // Unterminated string
+                        std::cerr << "[line " << line_number << "] Error: Unterminated string." << std::endl;
+                        ret_val = 65;
+                        break;
+                    }
+                    
+                    // Add closing quote to lexeme
+                    lexeme += "\"";
+                    
+                    // Create token with literal value
+                    Token token = Token(TokenType::STRING, lexeme, value, line_number);
+                    tokens.push_back(token);
+                    std::cout << token << std::endl;
                     break;
                 }
-
-                default:{
-                std::cerr << "[line " << line_number << "] Error: Unexpected character: " << *it << std::endl;
-                ret_val=65;
-                break;
-                }
+                
+                default:
+                    std::cerr << "[line " << line_number << "] Error: Unexpected character: " << c << std::endl;
+                    ret_val = 65;
+                    break;
             }
         }
+
+        std::cout << "EOF  null" << std::endl;
+        return ret_val;
     }
-
-    std::cout << "EOF  null" << std::endl;
-    return ret_val; 
-}
-std::cerr << "Unknown command: " << command << std::endl;
-return 1;
-
+    
+    std::cerr << "Unknown command: " << command << std::endl;
+    return 1;
 }
 
 std::string read_file_contents(const std::string& filename) {
@@ -155,8 +179,8 @@ std::string read_file_contents(const std::string& filename) {
     return buffer.str();
 }
 
-void add_token(TokenType type,std::string lexeme) {
-    Token token = Token(type, lexeme, std::nullopt, 0); 
+void add_token(TokenType type, std::string lexeme, std::optional<std::string> literal) {
+    Token token = Token(type, lexeme, literal, line_number);
     tokens.push_back(token);
     std::cout << token << std::endl;
 }
