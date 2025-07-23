@@ -9,6 +9,8 @@
 std::string read_file_contents(const std::string& filename);
 void add_token(TokenType type, std::string lexeme, std::optional<std::string> literal = std::nullopt);
 bool is_digit(char c);
+bool is_alpha(char c);
+bool is_alnum(char c);
 std::string normalize_number(const std::string& number);
 std::vector<Token> tokens;
 int line_number = 1;
@@ -178,6 +180,22 @@ int main(int argc, char *argv[]) {
                         Token token = Token(TokenType::NUMBER, number, literal, line_number);
                         tokens.push_back(token);
                         std::cout << token << std::endl;
+                    } else if (is_alpha(c)) {
+                        // Handle identifiers
+                        std::string identifier = "";
+                        size_t start = i;
+                        
+                        // Consume all consecutive alphanumeric characters
+                        while (i < file_contents.length() && is_alnum(file_contents[i])) {
+                            identifier += file_contents[i];
+                            i++;
+                        }
+                        
+                        i--;
+                        
+                        Token token = Token(TokenType::IDENTIFIER, identifier, std::nullopt, line_number);
+                        tokens.push_back(token);
+                        std::cout << token << std::endl;
                     } else {
                         std::cerr << "[line " << line_number << "] Error: Unexpected character: " << c << std::endl;
                         ret_val = 65;
@@ -216,6 +234,14 @@ void add_token(TokenType type, std::string lexeme, std::optional<std::string> li
 
 bool is_digit(char c) {
     return c >= '0' && c <= '9';
+}
+
+bool is_alpha(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+}
+
+bool is_alnum(char c) {
+    return is_alpha(c) || is_digit(c);
 }
 
 std::string normalize_number(const std::string& number) {

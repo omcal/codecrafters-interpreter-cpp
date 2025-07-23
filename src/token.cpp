@@ -81,6 +81,8 @@ std::string TokentypeToString(TokenType type)
         return "STRING";
     case NUMBER:
         return "NUMBER";
+    case IDENTIFIER:
+        return "IDENTIFIER";
     default:
         return "UNKNOWN_TOKEN";
     }
