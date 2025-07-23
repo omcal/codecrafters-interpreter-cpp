@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
 if (command == "tokenize") {
     std::string file_contents = read_file_contents(argv[2]);
     if (!file_contents.empty()) {
+        int line_number = 1;
         for (auto it = file_contents.begin(); it != file_contents.end(); ++it) {
             switch (*it) {
                 case ',':
@@ -49,7 +50,7 @@ if (command == "tokenize") {
                 case '/':{
                     if ((it + 1) != file_contents.end() && *(it+1) == '/') {
                         ++it; 
-                        while((it+1)!=file_contents.end()) ++it;
+                        while((it+1)!=file_contents.end() && *(it+1) != '\n') ++it;
                     }else{
                         add_token(TokenType::SLASH, "/");
                         break;
@@ -68,6 +69,7 @@ if (command == "tokenize") {
                     break;
                 }
                 case '\n':{
+                    line_number++;
                     break;
                 }
                 case '\t':{
@@ -123,7 +125,7 @@ if (command == "tokenize") {
                 }
 
                 default:{
-                std::cerr << "[line 1] Error: Unexpected character: " << *it << std::endl;
+                std::cerr << "[line " << line_number << "] Error: Unexpected character: " << *it << std::endl;
                 ret_val=65;
                 break;
                 }
