@@ -67,6 +67,15 @@ if (command == "tokenize") {
                     add_token(TokenType::RIGHT_PAREN, ")");
                     break;
                 }
+                case '\n':{
+                    break;
+                }
+                case '\t':{
+                    break;
+                }
+                case ' ':{
+                    break;
+                }
                 case '{':
                 {
                     add_token(TokenType::LEFT_BRACE, "{");
