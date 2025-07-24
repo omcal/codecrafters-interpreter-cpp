@@ -16,6 +16,8 @@ std::string normalize_number(const std::string& number);
 std::vector<Token> tokens;
 int line_number = 1;
 
+void parse_file(const std::string& filename);
+
 int main(int argc, char *argv[]) {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     std::cerr << "Logs from your program will appear here!" << std::endl;
@@ -209,10 +211,67 @@ int main(int argc, char *argv[]) {
 
         std::cout << "EOF  null" << std::endl;
         return ret_val;
+    } else if (command == "parse") {
+        parse_file(argv[2]);
+        return 0;
     }
     
     std::cerr << "Unknown command: " << command << std::endl;
     return 1;
+}
+
+void parse_file(const std::string& filename) {
+    std::string file_contents = read_file_contents(filename);
+    
+    // Reset tokens and line number for parsing
+    tokens.clear();
+    line_number = 1;
+    
+    // Tokenize the input first
+    for (size_t i = 0; i < file_contents.length(); i++) {
+        char c = file_contents[i];
+        
+        switch (c) {
+            case ' ':
+            case '\r':
+            case '\t':
+                break;
+                
+            case '\n':
+                line_number++;
+                break;
+                
+            default:
+                if (is_alpha(c)) {
+                    std::string identifier = "";
+                    size_t start = i;
+                    
+                    while (i < file_contents.length() && is_alnum(file_contents[i])) {
+                        identifier += file_contents[i];
+                        i++;
+                    }
+                    
+                    i--;
+                    
+                    TokenType tokenType = get_keyword_type(identifier);
+                    Token token = Token(tokenType, identifier, std::nullopt, line_number);
+                    tokens.push_back(token);
+                }
+                break;
+        }
+    }
+    
+    // Parse the tokens and output the result
+    if (!tokens.empty()) {
+        Token token = tokens[0];
+        if (token.get_type() == TokenType::TRUE) {
+            std::cout << "true" << std::endl;
+        } else if (token.get_type() == TokenType::FALSE) {
+            std::cout << "false" << std::endl;
+        } else if (token.get_type() == TokenType::NIL) {
+            std::cout << "nil" << std::endl;
+        }
+    }
 }
 
 std::string read_file_contents(const std::string& filename) {
