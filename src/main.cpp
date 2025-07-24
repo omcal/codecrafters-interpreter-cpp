@@ -241,6 +241,32 @@ void parse_file(const std::string& filename) {
                 line_number++;
                 break;
                 
+            case '"': {
+                std::string value = "";
+                std::string lexeme = "\"";
+                i++; 
+                
+                while (i < file_contents.length() && file_contents[i] != '"') {
+                    if (file_contents[i] == '\n') {
+                        line_number++;
+                    }
+                    value += file_contents[i];
+                    lexeme += file_contents[i];
+                    i++;
+                }
+                
+                if (i >= file_contents.length()) {
+                    // Handle unterminated string error if needed
+                    break;
+                }
+                
+                lexeme += "\"";
+                
+                Token token = Token(TokenType::STRING, lexeme, value, line_number);
+                tokens.push_back(token);
+                break;
+            }
+                
             default:
                 if (is_digit(c)) {
                     std::string number = "";
@@ -297,6 +323,8 @@ void parse_file(const std::string& filename) {
         } else if (token.get_type() == TokenType::NIL) {
             std::cout << "nil" << std::endl;
         } else if (token.get_type() == TokenType::NUMBER) {
+            std::cout << token.get_literal() << std::endl;
+        } else if (token.get_type() == TokenType::STRING) {
             std::cout << token.get_literal() << std::endl;
         }
     }
