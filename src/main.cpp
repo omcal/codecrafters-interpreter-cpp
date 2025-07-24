@@ -220,6 +220,8 @@ int main(int argc, char *argv[]) {
     return 1;
 }
 
+std::string parse_expression(size_t& index);
+
 void parse_file(const std::string& filename) {
     std::string file_contents = read_file_contents(filename);
     
@@ -241,6 +243,15 @@ void parse_file(const std::string& filename) {
                 line_number++;
                 break;
                 
+            case '(': {
+                tokens.push_back(Token(TokenType::LEFT_PAREN, "(", std::nullopt, line_number));
+                break;
+            }
+            case ')': {
+                tokens.push_back(Token(TokenType::RIGHT_PAREN, ")", std::nullopt, line_number));
+                break;
+            }
+            
             case '"': {
                 std::string value = "";
                 std::string lexeme = "\"";
@@ -315,19 +326,45 @@ void parse_file(const std::string& filename) {
     
     // Parse the tokens and output the result
     if (!tokens.empty()) {
-        Token token = tokens[0];
-        if (token.get_type() == TokenType::TRUE) {
-            std::cout << "true" << std::endl;
-        } else if (token.get_type() == TokenType::FALSE) {
-            std::cout << "false" << std::endl;
-        } else if (token.get_type() == TokenType::NIL) {
-            std::cout << "nil" << std::endl;
-        } else if (token.get_type() == TokenType::NUMBER) {
-            std::cout << token.get_literal() << std::endl;
-        } else if (token.get_type() == TokenType::STRING) {
-            std::cout << token.get_literal() << std::endl;
-        }
+        size_t index = 0;
+        std::string result = parse_expression(index);
+        std::cout << result << std::endl;
     }
+}
+
+std::string parse_expression(size_t& index) {
+    if (index >= tokens.size()) {
+        return "";
+    }
+    
+    Token token = tokens[index];
+    
+    if (token.get_type() == TokenType::LEFT_PAREN) {
+        index++; // consume '('
+        std::string inner = parse_expression(index);
+        if (index < tokens.size() && tokens[index].get_type() == TokenType::RIGHT_PAREN) {
+            index++; // consume ')'
+        }
+        return "(group " + inner + ")";
+    } else if (token.get_type() == TokenType::TRUE) {
+        index++;
+        return "true";
+    } else if (token.get_type() == TokenType::FALSE) {
+        index++;
+        return "false";
+    } else if (token.get_type() == TokenType::NIL) {
+        index++;
+        return "nil";
+    } else if (token.get_type() == TokenType::NUMBER) {
+        index++;
+        return token.get_literal();
+    } else if (token.get_type() == TokenType::STRING) {
+        index++;
+        return token.get_literal();
+    }
+    
+    index++;
+    return "";
 }
 
 std::string read_file_contents(const std::string& filename) {
