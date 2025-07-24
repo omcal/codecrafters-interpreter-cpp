@@ -242,7 +242,33 @@ void parse_file(const std::string& filename) {
                 break;
                 
             default:
-                if (is_alpha(c)) {
+                if (is_digit(c)) {
+                    std::string number = "";
+                    size_t start = i;
+                    
+                    while (i < file_contents.length() && is_digit(file_contents[i])) {
+                        number += file_contents[i];
+                        i++;
+                    }
+                    
+                    if (i < file_contents.length() && file_contents[i] == '.' && 
+                        i + 1 < file_contents.length() && is_digit(file_contents[i + 1])) {
+                        number += ".";
+                        i++; 
+                        
+                        while (i < file_contents.length() && is_digit(file_contents[i])) {
+                            number += file_contents[i];
+                            i++;
+                        }
+                    }
+                    
+                    i--;
+                    
+                    std::string literal = normalize_number(number);
+                    
+                    Token token = Token(TokenType::NUMBER, number, literal, line_number);
+                    tokens.push_back(token);
+                } else if (is_alpha(c)) {
                     std::string identifier = "";
                     size_t start = i;
                     
@@ -270,6 +296,8 @@ void parse_file(const std::string& filename) {
             std::cout << "false" << std::endl;
         } else if (token.get_type() == TokenType::NIL) {
             std::cout << "nil" << std::endl;
+        } else if (token.get_type() == TokenType::NUMBER) {
+            std::cout << token.get_literal() << std::endl;
         }
     }
 }
